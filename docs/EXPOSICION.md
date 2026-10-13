@@ -33,6 +33,6 @@
 
 `inference.py`: checkpoint → misma transformación → softmax → nombres en español.
 
-`app.py`: componentes Gradio y eventos → funciones → estado de la predicción por sesión.
+`app.py` / `streamlit_app.py`: entradas que llaman a `src/ui.py`. Este módulo crea componentes Streamlit, llama a inferencia y guarda la predicción en el estado de cada sesión.
 
 `recommend.py`: resultado → prompt con límites → Gemini → texto o error controlado.

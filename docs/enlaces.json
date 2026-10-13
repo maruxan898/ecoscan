@@ -2,5 +2,6 @@
   "github": "https://github.com/maruxan898/ecoscan",
   "app": "https://ecoscan-alexis-gabriela-agustin.streamlit.app/",
   "classification_verified": true,
-  "llm_verified": false
+  "llm_verified": true,
+  "llm_status": "Respuesta real verificada en la app pública el 2026-10-13; generateContent con gemini-3.5-flash-lite"
 }

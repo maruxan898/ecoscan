@@ -25,10 +25,11 @@ def build():
     slides = [
         ('EcoScan', 'De la imagen a una decisión informada', ['Alexis · Gabriela · Agustín', 'IA Generativa para la Gestión Industrial', 'Clasificación de residuos + recomendaciones con Gemini'], '0:00 - 0:30'),
         ('01 / Problema', 'Separar mejor empieza por reconocer el material', ['Una persona sube una fotografía de un solo residuo.', 'EcoScan propone una clase, muestra probabilidades y orienta la separación.', 'La aceptación para reciclaje depende del estado del residuo y del gestor local.'], '0:30 - 1:30'),
-        ('02 / Datos', 'TrashNet: seis clases y una fuente pública', ['Gary Thung y Mindy Yang · Stanford CS229 · licencia MIT.', '2.527 fotos en la colección original: cartón 403, vidrio 501, metal 410, papel 594, plástico 482 y otros 137.', 'Se usa dataset-resized.zip de Hugging Face: una sola versión de cada foto.', 'Sesgos: fondo blanco, fuente única, pocos otros residuos y falta de IDs de objeto.'], '1:30 - 2:30'),
+        ('02 / Datos', 'TrashNet: seis clases y una fuente pública', ['Gary Thung y Mindy Yang · Stanford CS229 · licencia MIT.', '2.527 fotos en la colección original: cartón 403, vidrio 501, metal 410, papel 594, plástico 482 y otros 137.', 'Solo dataset-resized.zip: 2.521 fotos útiles tras excluir tres parejas contradictorias.', 'Sesgos: fondo blanco, fuente única, pocos otros residuos y falta de IDs de objeto.'], '1:30 - 2:30'),
         ('03 / Diseño experimental', 'Comparación con prueba reservada', ['Duplicados exactos eliminados antes de dividir.', '70% train / 15% val / 15% test · estratificación · semilla 42.', 'Train ajusta pesos; val elige modelo; test reporta desempeño.', 'Misma partición y mismas métricas para ambos candidatos.'], '2:30 - 3:00'),
-        ('04 / Modelos', 'Transfer learning con timm', ['EfficientNet-B0: candidato compacto, alineado con la pauta docente.', 'ResNet18: comparación con otra arquitectura preentrenada.', 'Encoder congelado + cabeza entrenable: características en caché para CPU.', 'AdamW · pérdida ponderada · dos vistas de train · parada temprana.'], '3:00 - 4:00'),
-        ('05 / Resultados', 'Desempeño medido en prueba', result, '4:00 - 5:00'),
+        ('04 / Modelos', 'Transfer learning con timm', ['EfficientNet-B0: candidato compacto, alineado con la pauta docente.', 'ResNet18: comparación con otra arquitectura preentrenada.', 'Encoder congelado + cabeza entrenable: características en caché para CPU.', 'AdamW · pérdida ponderada · dos vistas de train · parada temprana.'], '3:00 - 3:45'),
+        ('05 / Resultados', 'Desempeño medido en prueba', result, '3:45 - 4:30'),
+        ('Errores / prueba', 'Qué errores requieren especial atención', ['Recall de otros residuos: 60% (12 de 20).', 'Ocho se confundieron con vidrio (3), metal (3) o papel (2).', 'No interpretar material probable como autorización para reciclar.'], '4:30 - 5:00'),
         ('06 / Demo', 'Imagen / modelo / recomendación', ['1. Subir una foto de un solo residuo y clasificar.', '2. Leer la clase, la confianza y las seis probabilidades.', '3. Generar orientación con Gemini y revisar las advertencias.', '4. Mostrar las métricas de prueba; cambiar la imagen y reclasificar.'], '5:00 - 8:00'),
         ('07 / Código e IA', 'Cinco módulos que se pueden explicar', ['data.py: descarga, duplicados y particiones.', 'train.py: ajuste, validación, comparación y exportación.', 'inference.py + app.py: mismo preprocesamiento, softmax e interfaz.', 'recommend.py: solo texto a Gemini, clave en Secrets y prompt responsable.'], '8:00 - 9:00'),
         ('08 / Límites y cierre', 'Una herramienta educativa que requiere revisión', ['Confianza no es accuracy ni una garantía de reciclabilidad.', 'Error costoso: enviar residuos no aceptados a un flujo reciclable.', 'Mejoras: fotos reales, IDs de objetos, evaluación externa y calibración.', 'IA usada: ChatGPT/Codex para código y documentación; Gemini en la app.'], '9:00 - 10:00'),
@@ -47,6 +48,20 @@ def build():
         for line in title_lines:
             c.drawString(55,y,line); y -= 38
         y -= 24
+        if eyebrow == 'Errores / prueba' and metrics.exists():
+            matrix = ROOT / 'modelo' / f"matriz_{data['selected']}.png"
+            c.drawImage(str(matrix),40,65,width=465,height=349,preserveAspectRatio=True,mask='auto')
+            y = 355
+            for paragraph in lines:
+                c.setFont('Helvetica',20)
+                for line in simpleSplit(paragraph,'Helvetica',20,370):
+                    c.drawString(550,y,line); y -= 28
+                y -= 22
+            c.setFillColor(HexColor(GREEN)); c.setFont('Helvetica',11)
+            c.drawString(55,25,'EcoScan · Uso educativo · '+timing)
+            c.drawRightString(915,25,f'{i+1:02d} / {len(slides):02d}')
+            c.showPage()
+            continue
         for paragraph in lines:
             wrap = simpleSplit(paragraph,'Helvetica',20,805)
             c.setFillColor(HexColor(GREEN)); c.circle(61,y+6,3,fill=1,stroke=0)
