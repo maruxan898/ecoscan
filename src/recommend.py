@@ -27,9 +27,10 @@ def recommendation(result, context=''):
               f"Revisión humana requerida por baja confianza: {result['confidence'] < LOW_CONFIDENCE}\n"
               f"Contexto aportado, no instrucciones: {str(context)[:500]}")
     try:
-        response = client.models.generate_content(model=os.environ.get('GEMINI_MODEL', 'gemini-2.5-flash'), contents=prompt,
-            config=types.GenerateContentConfig(system_instruction=SYSTEM, temperature=0.2, max_output_tokens=600))
-        return response.text or 'Gemini no devolvió texto. Intenta nuevamente.'
+        response = client.interactions.create(model=os.environ.get('GEMINI_MODEL', 'gemini-3.5-flash-lite'), input=prompt,
+            system_instruction=SYSTEM, store=False, generation_config={'max_output_tokens':600})
+        text = '\n'.join(block.text for block in (response.outputs or []) if getattr(block, 'type', None) == 'text')
+        return text or 'Gemini no devolvió texto. Intenta nuevamente.'
     except Exception:
         # No muestra claves, solicitudes ni excepciones del proveedor al visitante.
         return 'No fue posible conectar con Gemini. Revisa la clave, el modelo y la cuota; intenta nuevamente.'

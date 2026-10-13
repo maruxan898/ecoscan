@@ -9,6 +9,7 @@ from .config import CLASSES, ROOT, SPANISH, LOW_CONFIDENCE
 
 @lru_cache(maxsize=1)
 def load_model():
+    torch.set_num_threads(min(2, torch.get_num_threads()))
     path = ROOT / 'modelo/modelo.pt'
     if not path.exists():
         raise FileNotFoundError('Falta el modelo entrenado. Ejecuta el notebook de Colab y copia la carpeta modelo.')
