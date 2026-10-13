@@ -6,7 +6,7 @@ Proyecto de IA Generativa para la Gestión Industrial: clasificar una fotografí
 
 ## Estado de la entrega
 
-El código calcula y exporta resultados reales. Si faltan pesos o `modelo/metrics.json`, la app lo indica y no inventa predicciones ni métricas. La publicación y la API deben probarse con las cuentas y secretos del grupo. Repositorio público: https://github.com/maruxan898/ecoscan . App publicada: https://ecoscan-alexis-gabriela-agustin.streamlit.app/ . Clasificación verificada; integración Gemini en configuración.
+Entrega ejecutada y publicada. Se verificaron la carga de una fotografía, las seis probabilidades y una recomendación real de Gemini el 13 de octubre de 2026. Repositorio público: https://github.com/maruxan898/ecoscan . App: https://ecoscan-alexis-gabriela-agustin.streamlit.app/ . EfficientNet-B0 obtuvo 85,49% de accuracy en 379 fotos de prueba. La disponibilidad de Gemini depende del servicio y de la cuota de la cuenta; los errores se muestran sin inventar recomendaciones.
 
 ## Datos y fuentes
 
@@ -54,7 +54,7 @@ Error relevante: confundir otros residuos con un material potencialmente recicla
 
 ## Ejecutar localmente
 
-Python 3.11 recomendado. En PowerShell, desde la carpeta del proyecto:
+Requiere Python 3.11 en Windows o Linux. En PowerShell, desde la carpeta del proyecto:
 
 ```powershell
 python -m venv .venv
@@ -71,7 +71,7 @@ La CPU funciona, pero entrenar puede tardar considerablemente más que en Colab.
 
 Se usa la API oficial `google-genai`; recibe clase, confianza y contexto limitado a 500 caracteres. **No recibe la imagen.** El prompt limita el tema, pide revisión humana con confianza baja y evita inventar reglas municipales, colores de contenedores o aceptación de plásticos. Si falta clave o la API falla, se muestra el estado y no se presenta texto simulado como IA. La disponibilidad del modelo y la cuota dependen de la cuenta; `GEMINI_MODEL` permite cambiar a uno habilitado.
 
-La foto se procesa en el servidor. La app no la guarda explícitamente en una colección, pero la plataforma puede manejar archivos temporales y registros. No subir fotos con personas ni datos sensibles. La API tiene timeout de 30 segundos y no expone errores del proveedor o claves al visitante.
+La foto se procesa en el servidor. La app no la guarda explícitamente en una colección, pero la plataforma puede manejar archivos temporales y registros. No subir fotos con personas ni datos sensibles. La API tiene timeout de 60 segundos y no expone errores del proveedor o claves al visitante.
 
 ## Publicación gratuita: Streamlit Community Cloud
 
