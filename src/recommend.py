@@ -31,7 +31,9 @@ def recommendation(result, context=''):
     try:
         response = client.interactions.create(model=os.environ.get('GEMINI_MODEL', 'gemini-3.5-flash-lite'), input=prompt,
             system_instruction=SYSTEM, store=False, generation_config={'max_output_tokens':600}, timeout=30.0)
-        text = '\n'.join(block.text for block in (response.outputs or []) if getattr(block, 'type', None) == 'text')
+        text = getattr(response, 'output_text', None)
+        if not text:
+            text = '\n'.join(block.text for block in (getattr(response, 'outputs', None) or []) if getattr(block, 'type', None) == 'text')
         return text or 'Gemini no devolvió texto. Intenta nuevamente.'
     except Exception as exc:
         # No muestra claves, solicitudes ni excepciones del proveedor al visitante.
