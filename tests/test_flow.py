@@ -31,19 +31,19 @@ class FlowTests(unittest.TestCase):
         self.assertIn(state['class'], CLASSES)
 
     def test_llm_sends_text_and_disables_storage(self):
-        client = SimpleNamespace(interactions=SimpleNamespace(create=lambda **kw: None), close=lambda: None)
+        client = SimpleNamespace(models=SimpleNamespace(generate_content=lambda **kw: None), close=lambda: None)
         captured = {}
         def generate(**kwargs):
             captured.update(kwargs)
-            return SimpleNamespace(outputs=[SimpleNamespace(type='text',text='Solicita revisión humana.')])
-        client.interactions.create = generate
-        with patch.dict(os.environ, {'GEMINI_API_KEY':'test-placeholder'}), patch('google.genai.Client',return_value=client):
+            return SimpleNamespace(text='Solicita revisión humana.')
+        client.models.generate_content = generate
+        with patch.dict(os.environ, {'GEMINI_API_KEY':'test-placeholder'}), patch('google.genai.Client',return_value=client) as factory:
             answer = recommendation({'class':'glass','confidence':0.4}, 'x'*1000)
         self.assertEqual(answer,'Solicita revisión humana.')
-        self.assertFalse(captured['store'])
-        self.assertIsInstance(captured['input'],str)
-        self.assertIn('True',captured['input'])
-        self.assertNotIn('x'*501,captured['input'])
+        self.assertFalse(factory.call_args.kwargs['http_options'].extra_body['store'])
+        self.assertIsInstance(captured['contents'],str)
+        self.assertIn('True',captured['contents'])
+        self.assertNotIn('x'*501,captured['contents'])
 
 
 if __name__ == '__main__':
