@@ -1,6 +1,7 @@
 """El proveedor recibe solo texto; la imagen permanece fuera de la petición LLM."""
 import os
 import logging
+import re
 from .config import LOW_CONFIDENCE, CLASSES, SPANISH
 
 SYSTEM = '''Eres un asistente educativo sobre separación de residuos. Responde en español,
@@ -35,7 +36,11 @@ def recommendation(result, context=''):
     except Exception as exc:
         # No muestra claves, solicitudes ni excepciones del proveedor al visitante.
         status = getattr(exc, 'status_code', getattr(exc, 'code', None))
-        logging.warning('Gemini: tipo=%s, estado=%s', type(exc).__name__, status if isinstance(status, int) else 'desconocido')
+        body = getattr(exc, 'body', None)
+        error = body.get('error', body) if isinstance(body, dict) else {}
+        reason = error.get('message', 'Sin detalle del proveedor') if isinstance(error, dict) else 'Sin detalle del proveedor'
+        reason = re.sub(r'AIza[\w-]+', '[REDACTED]', str(reason).replace(key, '[REDACTED]'))
+        logging.warning('Gemini: tipo=%s, estado=%s, motivo=%s', type(exc).__name__, status if isinstance(status, int) else 'desconocido', ' '.join(reason.split())[:240])
         messages = {
             400:'Google no aceptó la solicitud. Verifica que la clave sea válida y que el modelo configurado esté habilitado.',
             401:'Google rechazó la clave API. Reemplázala en Secrets y vuelve a intentar.',
