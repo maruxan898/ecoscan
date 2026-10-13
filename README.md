@@ -17,7 +17,7 @@ Proyecto de IA Generativa para la Gestión Industrial: clasificar una fotografí
 
 ## Estado de la entrega
 
-El código calcula y exporta resultados reales. Si faltan pesos o `modelo/metrics.json`, la app lo indica y no inventa predicciones ni métricas. La publicación y la API deben probarse con las cuentas y secretos del grupo. Agregar aquí las URLs verificadas del repositorio público y del Space cuando existan.
+El código calcula y exporta resultados reales. Si faltan pesos o `modelo/metrics.json`, la app lo indica y no inventa predicciones ni métricas. La publicación y la API deben probarse con las cuentas y secretos del grupo. Repositorio público: https://github.com/maruxan898/ecoscan . La URL de la app se registrará al verificar el despliegue.
 
 ## Datos y fuentes
 
@@ -39,7 +39,7 @@ TrashNet fue creado por **Gary Thung y Mindy Yang**, para un proyecto de Stanfor
 
 El visor de Hugging Face muestra 5.054 registros, mientras la fuente original describe 2.527 fotos. EcoScan descarga específicamente **dataset-resized.zip** del repositorio de Hugging Face (unos 43 MB), para usar una sola versión de la colección. Los conteos efectivamente procesados se guardan en `modelo/conteos.csv`; no se asume que todas las filas del visor son observaciones independientes.
 
-Separación **70% entrenamiento, 15% validación, 15% prueba**, estratificada por clase, semilla 42 y redondeos de scikit-learn. Antes de dividir se eliminan duplicados exactos mediante hash de píxeles RGB y tamaño. Los hashes de los tres conjuntos deben ser disjuntos. No hay identificadores de objetos: esto no descarta fotos casi iguales del mismo objeto. Para una evaluación más exigente hace falta una colección externa o división por objeto.
+Separación **70% entrenamiento, 15% validación, 15% prueba**, estratificada por clase, semilla 42 y redondeos de scikit-learn. Antes de dividir se eliminan duplicados exactos mediante hash de píxeles RGB y tamaño. Los hashes de los tres conjuntos deben ser disjuntos. Si hay etiquetas contradictorias, se excluyen todas las versiones de esa foto. La auditoría encontró tres parejas contradictorias: quedan **2.521 fotos**, con **1.764 train, 378 val y 379 test**. Evidencia en `modelo/auditoria_datos.json`, `conflictos_etiquetas.csv` y `conteos.csv`. No hay identificadores de objetos: esto no descarta fotos casi iguales del mismo objeto. Para una evaluación más exigente hace falta una colección externa o división por objeto.
 
 Desbalance: `trash` es la clase minoritaria; `paper` tiene más de cuatro veces sus ejemplos. Se usa entropía cruzada ponderada calculada solo en entrenamiento y accuracy balanceada como criterio de selección. **trash no equivale a orgánicos.**
 
@@ -80,7 +80,19 @@ Se usa la API oficial `google-genai`; recibe clase, confianza y contexto limitad
 
 La foto se procesa en el servidor. La app no la guarda explícitamente en una colección, pero la plataforma puede manejar archivos temporales y registros. No subir fotos con personas ni datos sensibles. La API tiene timeout de 30 segundos y no expone errores del proveedor o claves al visitante.
 
-## Publicar en GitHub y Hugging Face Spaces
+## Publicación gratuita: Streamlit Community Cloud
+
+En esta cuenta Hugging Face exige un plan de pago para crear Spaces con Gradio/Docker. Se conserva `app.py` como interfaz Gradio, pero la publicación gratuita usa **streamlit_app.py**.
+
+1. Entrar a https://share.streamlit.io/ con GitHub y crear app desde **maruxan898/ecoscan**, rama **main**, archivo **streamlit_app.py**, Python **3.11**.
+2. En Advanced settings → Secrets configurar `GEMINI_API_KEY` y, opcionalmente, `GEMINI_MODEL`. No subir `.streamlit/secrets.toml`.
+3. Desplegar y probar foto propia y Gemini desde otro dispositivo. Registrar el enlace real en la ficha.
+
+Local: `.\.venv\Scripts\python.exe -m streamlit run streamlit_app.py`.
+
+Referencia oficial: https://docs.streamlit.io/deploy/streamlit-community-cloud
+
+## Alternativa: Gradio en Hugging Face Spaces (si la cuenta lo permite)
 
 1. Crear un repositorio **público** llamado `ecoscan`; invitar a los integrantes como colaboradores.
 2. Subir el contenido del proyecto: `app.py`, `src/`, `requirements.txt`, README, notebook ejecutado, `modelo/modelo.pt`, `modelo/metrics.json`, matrices, conteos, clases y `ejemplos/`. No subir `.venv/`, `datos/`, secretos ni los archivos privados de clases.
@@ -94,7 +106,9 @@ No se puede garantizar la disponibilidad de servicios gratuitos. Conservar captu
 ## Estructura
 
 ```text
-app.py                    interfaz Gradio
+app.py                    interfaz Gradio opcional
+streamlit_app.py          interfaz Streamlit para publicación gratuita
+.streamlit/config.toml    tema y límite de carga
 src/data.py               descarga, duplicados y particiones
 src/train.py              entrenamiento, comparación y exportación
 src/inference.py          carga, preprocesamiento e inferencia
