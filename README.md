@@ -43,11 +43,15 @@ Separación **70% entrenamiento, 15% validación, 15% prueba**, estratificada po
 
 Desbalance: `trash` es la clase minoritaria; `paper` tiene más de cuatro veces sus ejemplos. Se usa entropía cruzada ponderada calculada solo en entrenamiento y accuracy balanceada como criterio de selección. **trash no equivale a orgánicos.**
 
+## Resultados obtenidos
+
+**EfficientNet-B0** fue elegido por validación: **85,49% accuracy, 82,47% accuracy balanceada y F1 macro 0,827** en las 379 fotos de prueba. ResNet18: **84,17%, 81,10% y 0,809**. Modalidad: encoder congelado y cabeza entrenada sobre características en caché. El recall de otros residuos fue 60% (12/20); sus ocho errores hacia vidrio, metal o papel requieren especial atención. Interpretación completa en `docs/RESULTADOS.md`.
+
 ## Modelos y evaluación
 
-Se comparan **EfficientNet-B0** y **ResNet18**, ambos preentrenados en ImageNet con `timm`. EfficientNet sigue la pauta docente y es un candidato compacto; ResNet18 ofrece un contraste de arquitectura. Se adapta la salida a seis clases y se ajustan todos los pesos con AdamW, lr=1e-4, weight_decay=1e-4, aumento de datos solo en entrenamiento y normalización propia de cada modelo.
+Se comparan **EfficientNet-B0** y **ResNet18**, ambos preentrenados en ImageNet con `timm`. EfficientNet sigue la pauta docente y es un candidato compacto; ResNet18 ofrece un contraste de arquitectura. Se adapta la salida a seis clases. **Modalidad ejecutada por defecto: extracción de características en caché (cached_linear_probe)**: encoder ImageNet congelado y cabeza lineal entrenable, AdamW lr=1e-3, weight_decay=1e-4, dos vistas de cada imagen de train (determinista y aumentada), hasta 80 épocas y paciencia 15. Reduce el cómputo en CPU. El notebook permite cambiar a **fine_tune** en GPU, con ajuste de todos los pesos, lr=1e-4, hasta 12 épocas y paciencia 4. El campo mode de metrics.json distingue ambas modalidades; no mezclar sus resultados. La normalización es la del modelo.
 
-Máximo 12 épocas y parada temprana tras 4 sin mejora. El mejor checkpoint de cada modelo se elige por validación. La arquitectura ganadora se decide **antes de evaluar prueba**; ambas se evalúan sobre las mismas fotos de prueba para reportar accuracy, accuracy balanceada, F1 macro, precisión/recall por clase y matriz de confusión. El modelo ganador se exporta a `modelo/modelo.pt`, con clases y configuración de preprocesamiento para que la app use exactamente el mismo orden y normalización. No requiere descargar pesos ImageNet al arrancar.
+El mejor checkpoint de cada modelo se elige por validación. La arquitectura ganadora se decide **antes de evaluar prueba**; ambas se evalúan sobre las mismas fotos de prueba para reportar accuracy, accuracy balanceada, F1 macro, precisión/recall por clase y matriz de confusión. El modelo ganador se exporta a `modelo/modelo.pt`, con clases y configuración de preprocesamiento para que la app use exactamente el mismo orden y normalización. No requiere descargar pesos ImageNet al arrancar.
 
 Error relevante: confundir otros residuos con un material potencialmente reciclable puede contaminar una carga. El reporte mide clasificación de material, **no aceptación real para reciclaje**. Analizar la fila `trash` y las confusiones hacia materiales; también mirar plástico/vidrio. La confianza softmax no está calibrada y no detecta de forma fiable objetos fuera de dominio. El umbral 70% es una política educativa, no un indicador validado de seguridad.
 
@@ -66,9 +70,9 @@ Python 3.11 recomendado. En PowerShell, desde la carpeta del proyecto:
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
-.\.venv\Scripts\python.exe -m src.train --epochs 12 --prepare
+.\.venv\Scripts\python.exe -m src.train --epochs 12 --prepare  # Ajuste completo; para modo CPU ejecutar el notebook
 $env:GEMINI_API_KEY = "CONFIGURAR_LOCALMENTE"
-$env:GEMINI_MODEL = "gemini-2.5-flash"
+$env:GEMINI_MODEL = "gemini-3.5-flash-lite"
 .\.venv\Scripts\python.exe app.py
 ```
 
@@ -110,7 +114,8 @@ app.py                    interfaz Gradio opcional
 streamlit_app.py          interfaz Streamlit para publicación gratuita
 .streamlit/config.toml    tema y límite de carga
 src/data.py               descarga, duplicados y particiones
-src/train.py              entrenamiento, comparación y exportación
+src/train.py              ajuste completo, evaluación y exportación
+src/train_cached.py       comparación CPU con características en caché
 src/inference.py          carga, preprocesamiento e inferencia
 src/recommend.py          prompt responsable y Gemini
 notebooks/entrenamiento.ipynb  flujo reproducible en Colab

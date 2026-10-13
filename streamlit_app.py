@@ -42,11 +42,11 @@ with analyze:
                 image = Image.open(BytesIO(raw))
                 if image.width*image.height > 25_000_000:
                     raise ValueError('Imagen demasiado grande')
-                st.image(image, caption='Imagen actual', use_container_width=True)
-            except (UnidentifiedImageError, ValueError, Image.DecompressionBombError):
+                st.image(image, caption='Imagen actual', width='stretch')
+            except (UnidentifiedImageError, OSError, ValueError, Image.DecompressionBombError):
                 st.error('La imagen no es válida o excede 25 megapíxeles.')
                 image = None
-        if st.button('Identificar material', type='primary', disabled=image is None, use_container_width=True):
+        if st.button('Identificar material', type='primary', disabled=image is None, width='stretch'):
             try:
                 with st.spinner('Analizando el material…'):
                     probs, summary, result = predict(image)
@@ -58,12 +58,12 @@ with analyze:
             st.markdown(st.session_state.summary)
             data = pd.DataFrame({'Material':st.session_state.probabilities.keys(), 'Probabilidad':st.session_state.probabilities.values()}).set_index('Material')
             st.bar_chart(data, color='#1b7d61', horizontal=True)
-            st.dataframe(data.style.format({'Probabilidad':'{:.1%}'}), use_container_width=True)
+            st.dataframe(data.style.format({'Probabilidad':'{:.1%}'}), width='stretch')
         else:
             st.markdown('### Reconoce el material')
             st.write('Sube una foto o elige un ejemplo y pulsa **Identificar material** para ver las seis probabilidades.')
         context = st.text_area('Contexto opcional', placeholder='Por ejemplo: envase con restos de comida', max_chars=500)
-        if st.button('Generar recomendación con IA', disabled=not st.session_state.get('result'), use_container_width=True):
+        if st.button('Generar recomendación con IA', disabled=not st.session_state.get('result'), width='stretch'):
             with st.spinner('Generando orientación con Gemini…'):
                 st.session_state.advice = recommendation(st.session_state.result, context)
         if st.session_state.get('advice'):
@@ -75,7 +75,7 @@ with performance:
         st.image(str(p), caption=p.stem.replace('_',' '))
     if (ROOT/'modelo/conteos.csv').exists():
         st.subheader('Distribución de los datos utilizados')
-        st.dataframe(pd.read_csv(ROOT/'modelo/conteos.csv').set_index('label'), use_container_width=True)
+        st.dataframe(pd.read_csv(ROOT/'modelo/conteos.csv').set_index('label'), width='stretch')
 with about:
     st.markdown('''### Del reconocimiento a la orientación
 TrashNet contiene cartón, vidrio, metal, papel, plástico y otros residuos.
