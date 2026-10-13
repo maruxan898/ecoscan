@@ -1,0 +1,7 @@
+label,test,train,val
+cardboard,61,282,60
+glass,75,348,75
+metal,62,286,61
+paper,89,416,89
+plastic,72,336,72
+trash,20,96,21
